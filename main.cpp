@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
+#include <string.h>
 
 
 #define SQL_DB "maksi"
@@ -149,24 +150,23 @@ int viewDB(MYSQL *_connection)
 
 	int _tmp;
 
+	printf("\x1b[47;30mName                     |"
+		"Second Name              |"
+		"Telephone #              |\x1b[0m\n");
+
 	while((tmpRow = mysql_fetch_row(tmpResult)) != NULL)
 	{
-		printf("\x1b[47;30mName                |"
-			"Second Name              |"
-			"Telephone #              |\x1b[0m\n");
 		for (int i = 0; i < 3; i++)
 		{
-			for (int j = 0; j < sizeof(tmpRow[i])/sizeof(char); j++, _tmp++)
-			{
-				putchar(tmpRow[i][j]);
-			}
-			for (int k = 0; k < (25 - _tmp); k++)
+			printf("%s", tmpRow[i]);
+			_tmp = (25 - strlen(tmpRow[i]));
+			for (int j = 0; j < _tmp; j++)
 				putchar(' ');
 			putchar('|');
-			_tmp = 0;
 		}
+		putchar('\n');
 	}
-
+	putchar('\n');
 	mysql_free_result(tmpResult);
 	return 0;
 }
