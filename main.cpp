@@ -5,12 +5,10 @@
 #include <string.h>
 
 
+#include "funDB.h"
+
 #define SQL_DB "maksi"
 #define SQL_PORT 0
-
-#define COLOR_ERR "\x1b[31;1m"
-#define COLOR_NORMAL "\x1b[0m"
-
 
 struct Status
 {
@@ -18,19 +16,10 @@ struct Status
 	int numEnd;
 };
 
-char getch();
-
-int viewDB(MYSQL *_connection);
-
-void err_msg(char* _msg);
-void err_msg(const char* _msg);
-
 int main()
 {
 	MYSQL *connector, 
 		mysql;
-	MYSQL_RES *sqlRes;
-	MYSQL_ROW sqlRow;
 	mysql_init(&mysql);
 
 	char logIn[20], 
@@ -87,7 +76,6 @@ int main()
 
 	while (stat.work)
 	{
-		//TODO: main process
 		printf("Select: \n"
 			"\x1b[1m1 - View\x1b[0m [View base clients]\n"
 			"\x1b[1m2 - Serch\x1b[0m [Serch in base clients]\n"
@@ -102,15 +90,25 @@ int main()
 		switch(menuSelect)
 		{
 			case 1:
-				if (viewDB(connector) != 0)
+				if (viewDB(connector, "Select name, fom, tel from clients") != 0)
 				{
 					stat.work = false;
-					stat.numEnd = 1;
+					stat.numEnd = -1;
 				}
 				break;
 			case 2:
+				if ((stat.numEnd = serchDB(connector)) < 0)
+				{
+					stat.work = false;
+					stat.numEnd = -1;
+				}
 				break;
 			case 3:
+				if (insertDB(connector) != 0)
+				{
+					stat.work = false;
+					stat.numEnd = -1;
+				}
 				break;
 			case 4:
 				stat.work = false;
@@ -129,77 +127,3 @@ int main()
 }
 
 
-
-int viewDB(MYSQL *_connection)
-{
-	MYSQL_RES *tmpResult;
-	MYSQL_ROW tmpRow;
-
-	if(mysql_query(_connection, "Select name, fom, tel from clients") != 0)
-	{
-		err_msg(mysql_error(_connection));
-		return 1;
-	}
-
-	tmpResult = mysql_store_result(_connection);
-	if(tmpResult == NULL)
-	{
-		err_msg(mysql_error(_connection));
-		return 1;
-	}
-
-	int _tmp;
-
-	printf("\x1b[47;30mName                     |"
-		"Second Name              |"
-		"Telephone #              |\x1b[0m\n");
-
-	while((tmpRow = mysql_fetch_row(tmpResult)) != NULL)
-	{
-		for (int i = 0; i < 3; i++)
-		{
-			printf("%s", tmpRow[i]);
-			_tmp = (25 - strlen(tmpRow[i]));
-			for (int j = 0; j < _tmp; j++)
-				putchar(' ');
-			putchar('|');
-		}
-		putchar('\n');
-	}
-	putchar('\n');
-	mysql_free_result(tmpResult);
-	return 0;
-}
-
-void err_msg(char *_msg)
-{
-	fprintf(stderr, "%s%s%s\n", COLOR_ERR, _msg, COLOR_NORMAL);
-}
-
-void err_msg(const char *_msg)
-{
-	fprintf(stderr, "%s%s%s\n", COLOR_ERR, _msg, COLOR_NORMAL);
-}
-
-char getch()
-{
-	struct termios tmpTerm, normalTerm;
-	int _char;
-	tcgetattr(STDIN_FILENO,&normalTerm);
-		//get attr from normal terminal
-	tmpTerm = normalTerm;
-		//copy to tmp
-	tmpTerm.c_lflag &= ~(ICANON|ECHO);
-		//off echo and verification by ENTER
-	tcsetattr(STDIN_FILENO, TCSANOW, &tmpTerm);
-		//setup attr NOW (TCSANOW)
-	_char = getchar();
-
-	tcsetattr(STDIN_FILENO, TCSANOW, &normalTerm);
-		//return to normal attr
-	return _char;
-
-	/*
-		Нелохой такой велосипед :D
-	*/
-}
