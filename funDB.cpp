@@ -43,8 +43,48 @@ int serchDB(MYSQL *_connection)
 			return 0;
 		}
 		case 2:
+		{
+			printf("Enter serch second name:\n> ");
+			if(scanf("%15s", inputData) < 1)
+			{
+				err_msg("Invalid input data!");
+				return 1;
+			} putchar('\n');
+
+			char query[] = "Select name, fom, tel from clients WHERE fom = \'";
+			int size = (strlen(query)+strlen(inputData));
+			char *_query = new char[size];
+
+			strcpy(_query, query);
+			strcat(_query, inputData);
+			strcat(_query, "\'");
+
+			const char * const_query = (const char*)_query;
+			viewDB(_connection, const_query);
+			return 0;
+		}
 			break;
 		case 3:
+		{
+			printf("Enter serch telephone number:\n> ");
+			if(scanf("%15s", inputData) < 1)
+			{
+				err_msg("Invalid input data!");
+				return 1;
+			} putchar('\n');
+
+			char query[] = "Select name, fom, tel from clients WHERE tel = \'";
+			int size = (strlen(query)+strlen(inputData));
+			char *_query = new char[size];
+
+			strcpy(_query, query);
+			strcat(_query, inputData);
+			strcat(_query, "\'");
+
+			const char * const_query = (const char*)_query;
+			viewDB(_connection, const_query);
+			return 0;
+		}
 			break;
 		case 4:
 			putchar('\n');
