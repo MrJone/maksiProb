@@ -17,7 +17,7 @@ int serchDB(MYSQL *_connection)
 		err_msg("Invalid input data!");
 	}
 
-	char inputData[16];
+	char inputData[25];
 
 	switch(menuSelect)
 	{
@@ -45,7 +45,7 @@ int serchDB(MYSQL *_connection)
 		case 2:
 		{
 			printf("Enter serch second name:\n> ");
-			if(scanf("%15s", inputData) < 1)
+			if(scanf("%25s", inputData) < 1)
 			{
 				err_msg("Invalid input data!");
 				return 1;
@@ -67,7 +67,7 @@ int serchDB(MYSQL *_connection)
 		case 3:
 		{
 			printf("Enter serch telephone number:\n> ");
-			if(scanf("%15s", inputData) < 1)
+			if(scanf("%12s", inputData) < 1)
 			{
 				err_msg("Invalid input data!");
 				return 1;
@@ -99,6 +99,52 @@ int serchDB(MYSQL *_connection)
 
 int insertDB(MYSQL *_connection)
 {
+	MYSQL_RES *tmpResult;
+	MYSQL_ROW tmpRow;
+
+	char _name[16],
+		_fom[26],
+		_tel[13];
+
+	printf("Enter name:\n> ");
+
+	if(scanf("%15s", _name) < 1)
+	{
+		err_msg("Invalid input data!");
+		return 1;
+	}
+
+	printf("Enter second name:\n> ");
+	if(scanf("%25s", _fom) < 1)
+	{
+		err_msg("Invalid input data!");
+		return 1;
+	}
+
+	printf("Enter telephone number:\n> ");
+	if(scanf("%12s", _tel) < 1)
+	{
+		err_msg("Invalid input data!");
+		return 1;
+	}
+
+	char query[] = "INSERT INTO clients (name, fom, tel) VALUES(\"";
+	char *_query = new char[(strlen(query)+strlen(_name)+strlen(_fom)+strlen(_tel)+6)];
+	strcpy(_query, query);
+	strcat(_query, _name);
+	strcat(_query, "\",\"");
+	strcat(_query, _fom);
+	strcat(_query, "\",\"");
+	strcat(_query, _tel);
+	strcat(_query, "\")");
+
+	const char *c_query = (const char*)_query;
+
+	if(mysql_query(_connection, c_query) != 0)
+	{
+		err_msg(mysql_error(_connection));
+		return -1;
+	}
 
 }
 
@@ -138,6 +184,9 @@ int viewDB(MYSQL *_connection, const char* _query)
 		}
 		putchar('\n');
 	}
+	printf("\x1b[47;30m                         |"
+		"                         |"
+		"                         |\x1b[0m\n");
 	putchar('\n');
 	mysql_free_result(tmpResult);
 	return 0;
